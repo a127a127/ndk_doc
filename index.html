@@ -1,0 +1,114 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<script type="text/javascript" src="./jquery-2.1.1.min.js"></script>
+	<script type="text/javascript" src="./coffee-script.js"></script>
+	<script type="text/javascript" src="./teacup.js"></script>
+	<title>NDK</title>
+	<style type="text/css">
+		.para {
+			margin: 50px 0px;
+		}
+	</style>
+</head>
+<body>
+<script type="text/coffeescript">
+tc = (template)->
+	r = ()-> template.apply(teacup, arguments)
+	r.render = teacup.renderable(r)
+	return r
+
+$('body').append(tc(->
+	link = tc (url)->
+		@a {href: url}, url
+	pic = (n)->
+		n = "00#{n}".slice(-2)
+		@img {src:"./#{n}.png", alt: n}
+
+	paras = {
+		0: (pic)->
+			@div '這個android app的功能只是輸入一個名字，顯示這個字串和它的長度。'
+			@div ->
+				@span 'onCreateView的內容就是這個app的核心邏輯code：'
+				@blockquote '當user輸入字串s時，將length_view設為s的長度，也將name_view設為s。'
+			@div '以下會實作strlen和set_last_string_to_name_view這兩個native函數，示範：'
+			@ol ->
+				@li '在ADT Bundle中設定好NDK環境'
+				@li '從Java call C/C++ function'
+				@li '在C/C++中保存Java的reference'
+				@li '從C/C++ call Java method'
+			@div '下圖有點大，需要拉一下捲軸才看得到手機螢幕與後續對這個圖的解說。'
+			pic()
+		1: (pic)->
+			@div '必須要先安裝NDK Plugins： Help -> Install New Software'
+			pic()
+		2: (pic)->
+			@div '在Work with中輸入： https://dl-ssl.google.com/android/eclipse/'
+			@div '按Enter後需要等他抓一下資料。然後勾選NDK Plugins。'
+			pic()
+			@div '之後就是下一步下一步直到完成。'
+		3: (pic)->
+			@div ->
+				@span '接下來要安裝NDK，先到'
+				link 'https://developer.android.com/tools/sdk/ndk/index.html'
+				@span '下載NDK，並解壓縮。'
+				@div '接下來要在Eclipse中設定NDK的路徑，Window -> Preferences'
+			pic()
+		4: (pic)->
+			@div '左邊選單中選擇Android -> NDK。'
+			@div 'NDK Location中設定你放NDK的路徑。'
+			pic()
+			@div '按ok後NDK就設定完成了，接下來就是需要個別針對project啟用NDK build。'
+		5: (pic)->
+			@div '在project上按右鍵 -> Android Tools -> Add Native Support'
+			pic()
+		6: (pic)->
+			@div '填你想要的C/C++ library名稱。之後還可以在jni/Android.mk中修改。'
+			pic()
+		7: (pic)->
+			@div '完成後可以看到ADT自動幫你建好jni資料夾和你的library name .cpp與Android.mk'
+			@div '這些都是很單純的檔案，後續都可以透過Android.mk修改。'
+			@div '5~7步最主要是要讓ADT幫你設定好NDK builder，讓你build project時可以連帶編譯native library。'
+			pic()
+			@div '到這一步之後，Eclipse已經會自動依據jni/Android.mk幫你編譯、打包native library了。'
+		8: (pic)->
+			@div '8~12步是介紹利用Eclipse呼叫javah去產生對應的native function宣告，這裡有麻煩的classpath問題要設定。建議能的話就直接自己手寫比較快。'
+			@div '你已經依照JNI標準寫好native code的話，可以跳過8~12步，直接到13步對照成果。'
+			@div 'Run -> External Tools -> External Tools Configurations'
+			pic()
+		9: (pic)->
+			@div '點兩下Program，會造出一個新的External Program'
+			pic()
+		10: (pic)->
+			@div '將名稱改為javah，Main裡面三欄依照你自己的情況對照著設定。'
+			pic()
+		11: (pic)->
+			@div '到Common分頁勾選External Tools，方便之後使用。'
+			pic()
+		12: (pic)->
+			@div '在你的class內寫好native function的宣告。'
+			@div '之後必須要在Package Explorer選擇你要傳給javah的java檔，然後就可以run javah了。'
+			pic()
+		13: (pic)->
+			@div '下圖有點大，是完整實作native後，有修改到的程式碼。'
+			pic()
+		14: (pic)->
+			@div '因為native code會限制住architecture，為了support更多device，可以在jni資料夾中新增一個Application.mk，內容就是一行APP_ABI := all。'
+			@div '重新build project後，就可以在下面的console看到同時編了x86和mips版本。'
+			pic()
+	}
+
+	show_p = tc (para, i)->
+		@div class: 'para', ->
+			@h3 i
+			para.call(@, => pic.call(@, i))
+
+	@div ->
+		@h3 'NDK安裝、設定步驟'
+		@h5 '以下將一個簡單的android app的功能實作部份改用JNI，藉此示範和簡介NDK的設定與使用。'
+		show_p para, i for i, para of paras
+).render())
+</script>
+</body>
+</html>
